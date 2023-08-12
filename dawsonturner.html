@@ -10,7 +10,7 @@
 
     <script>
         // Load data from CSV
-        Plotly.d3.csv("Untitled spreadsheet.xlsx - Sheet1 (1).csv", function (data) {
+        Plotly("Untitled spreadsheet.xlsx - Sheet1 (1).csv", function (data) {
             const x = data.map(row => parseFloat(row.x));
             const y = data.map(row => parseFloat(row.y));
             
