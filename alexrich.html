@@ -1,14 +1,39 @@
-<html>
-  <head>
-    <title>Alex Rich</title>
-  </head>
-  <center>
-    <h1>Alex Rich Hitting Reports</h1>
-  <body>
-    <div class="container">
-    <div class="container">
-      <d<div class="image"> <img src="Rich 6.4.png" style="width:1000px;height:300px;"</div>
-    </div>
-        </center>
-  </body
-</html>
+class Player:
+    def __init__(self, name):
+        self.name = name
+        self.hits = []
+
+    def record_hit(self, x, y):
+        self.hits.append((x, y))
+
+def main():
+    players = {}  # Dictionary to store player objects
+    num_players = int(input("Enter the number of players: "))
+
+    for _ in range(num_players):
+        player_name = input("Enter player name: ")
+        players[player_name] = Player(player_name)
+
+    inning = 1
+    while True:
+        print(f"Scoring Inning {inning}")
+        for player_name in players:
+            player = players[player_name]
+            x = int(input(f"Enter x-coordinate for {player_name}'s hit: "))
+            y = int(input(f"Enter y-coordinate for {player_name}'s hit: "))
+            player.record_hit(x, y)
+
+        more_innings = input("Do you want to score another inning? (y/n): ")
+        if more_innings.lower() != "y":
+            break
+        inning += 1
+
+    # Display spray charts
+    for player_name in players:
+        player = players[player_name]
+        print(f"{player_name}'s Spray Chart:")
+        for hit in player.hits:
+            print(f"X: {hit[0]}, Y: {hit[1]}")
+
+if __name__ == "__main__":
+    main()
