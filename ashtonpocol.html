@@ -42,7 +42,7 @@
     <script>
         // Load pitch data from CSV file
         async function loadPitchData() {
-            const response = await fetch('pitch_data.csv');
+            const response = await fetch('Untitled spreadsheet.xlsx - Sheet1 (1).csv');
             const text = await response.text();
             const rows = text.trim().split('\n');
             const pitchData = rows.slice(1).map(row => {
