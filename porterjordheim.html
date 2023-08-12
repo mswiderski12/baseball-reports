@@ -1,14 +1,58 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Porter Jordheim</title>
-  </head>
-  <body>
-    <center>
-      <h1>Porter Jordheim Pitching Reports</h1>
-    <div class="container">
-      <div class="image"> <img src="Matt-swiderski-523.png" alt=</div> 
-      <div class="image"> <img src="Swiderski 5.18.png"</div>
-    </div>
-        </center>
-  </body
+<head>
+    <title>Baseball Strike Zone Heat Map</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Baseball Strike Zone Heat Map</h1>
+    
+    <input type="file" id="csvFileInput">
+    <button onclick="generateHeatMap()">Generate Strike Zone Heat Map</button>
+    
+    <div id="heatmap"></div>
+    
+    <script>
+        function generateHeatMap() {
+            const csvFileInput = document.getElementById("csvFileInput");
+            const file = csvFileInput.files[0];
+            
+            if (!file) {
+                alert("Please select a CSV file.");
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                const text = event.target.result;
+                const rows = text.trim().split('\n');
+                
+                const data = [];
+                
+                for (let i = 1; i < rows.length; i++) {
+                    const [x, y] = rows[i].split(',').map(parseFloat);
+                    data.push({ x, y });
+                }
+                
+                // Filter data to display within strike zone (modify as needed)
+                const strikeZoneData = data.filter(point => point.x >= -1 && point.x <= 1 && point.y >= 1 && point.y <= 4);
+                
+                const trace = {
+                    x: strikeZoneData.map(point => point.x),
+                    y: strikeZoneData.map(point => point.y),
+                    type: "heatmap",
+                    colorscale: "Viridis"
+                };
+                
+                const layout = {
+                    title: "Baseball Strike Zone Heat Map"
+                };
+                
+                Plotly.newPlot("heatmap", [trace], layout);
+            };
+            
+            reader.readAsText(file);
+        }
+    </script>
+</body>
 </html>
