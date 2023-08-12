@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Fillable Baseball Spray Chart</title>
+    <title>Baseball Field Spray Chart</title>
     <style>
         body {
             font-family: Arial, sans-serif;
         }
 
         .field {
-            width: 500px;
+            width: 800px;
             height: 500px;
-            background-color: #f0f0f0;
+            background-image: url('baseball_field.png'); /* Replace with your field image */
+            background-size: cover;
             position: relative;
             margin: 0 auto;
         }
@@ -25,11 +26,11 @@
     </style>
 </head>
 <body>
-    <h1>Fillable Baseball Spray Chart</h1>
+    <h1>Baseball Field Spray Chart</h1>
     
     <div>
         <label for="xCoord">X Coordinate:</label>
-        <input type="number" id="xCoord" min="-250" max="250" step="1">
+        <input type="number" id="xCoord" min="0" max="800" step="1">
         
         <label for="yCoord">Y Coordinate:</label>
         <input type="number" id="yCoord" min="0" max="500" step="1">
@@ -49,8 +50,8 @@
 
                 const hitElement = document.createElement("div");
                 hitElement.className = "hit";
-                hitElement.style.left = (xCoord + 250) + "px";
-                hitElement.style.top = (500 - yCoord) + "px";
+                hitElement.style.left = xCoord + "px";
+                hitElement.style.top = yCoord + "px";
                 field.appendChild(hitElement);
             }
         }
