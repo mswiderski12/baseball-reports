@@ -1,54 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Baseball Spray Chart</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        .field {
-            width: 500px;
-            height: 500px;
-            background-color: #f0f0f0;
-            position: relative;
-            margin: 0 auto;
-        }
-
-        .hit {
-            width: 10px;
-            height: 10px;
-            background-color: blue;
-            border-radius: 50%;
-            position: absolute;
-        }
-    </style>
+    <title>Baseball Pitching Heat Map</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <h1>Baseball Spray Chart</h1>
+    <h1>Baseball Pitching Heat Map</h1>
+    <div id="heatmap"></div>
 
-    <div class="field" id="field"></div>
-
-    <script src="https://d3js.org/d3.v7.min.js"></script>
     <script>
-        d3.csv("Untitled spreadsheet.xlsx - Sheet1 (1).csv")
-            .then(data => {
-                const field = document.getElementById("field");
-                
-                const scaleX = d3.scaleLinear().domain([-250, 250]).range([0, 500]);
-                const scaleY = d3.scaleLinear().domain([0, 500]).range([500, 0]);
-                
-                field.innerHTML = "";
-                data.forEach(hit => {
-                    const hitElement = document.createElement("div");
-                    hitElement.className = "hit";
-                    hitElement.style.left = scaleX(hit.x) + "px";
-                    hitElement.style.top = scaleY(hit.y) + "px";
-                    field.appendChild(hitElement);
-                });
-            })
-            .catch(error => console.error(error));
+        // Load data from CSV
+        Plotly.d3.csv("pitch_data.csv", function (data) {
+            const x = data.map(row => parseFloat(row.x));
+            const y = data.map(row => parseFloat(row.y));
+            
+            const trace = {
+                x: x,
+                y: y,
+                mode: "markers",
+                type: "heatmap",
+                colorscale: "Viridis",
+                showscale: true
+            };
+            
+            const layout = {
+                title: "Pitching Heat Map",
+                xaxis: { title: "Horizontal Location" },
+                yaxis: { title: "Vertical Location" }
+            };
+            
+            const config = { responsive: true };
+            
+            Plotly.newPlot("heatmap", [trace], layout, config);
+        });
     </script>
 </body>
 </html>
-
