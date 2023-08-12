@@ -1,14 +1,85 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Ashton Pocol</title>
-  </head>
-  <body>
-    <center>
-      <h1>Ashton Pocol Pitching Reports</h1>
-    <div class="container">
-      <div class="image"> <img src="Matt-swiderski-523.png" alt=</div> 
-      <div class="image"> <img src="Swiderski 5.18.png"</div>
+<head>
+    <title>Baseball Strike Zone Heat Map</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .strike-zone {
+            width: 300px;
+            height: 450px;
+            border: 2px solid #333;
+            position: relative;
+            margin: 50px auto;
+        }
+
+        .heatmap {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 255, 0.2);
+        }
+
+        .heatmap-cell {
+            position: absolute;
+            width: 10%;
+            height: 10%;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <h1>Baseball Strike Zone Heat Map</h1>
+
+    <div class="strike-zone">
+        <div class="heatmap" id="heatmap"></div>
     </div>
-        </center>
-  </body
+
+    <script>
+        // Load pitch data from CSV file
+        async function loadPitchData() {
+            const response = await fetch('pitch_data.csv');
+            const text = await response.text();
+            const rows = text.trim().split('\n');
+            const pitchData = rows.slice(1).map(row => {
+                const [x, y] = row.split(',');
+                return { x: parseFloat(x), y: parseFloat(y) };
+            });
+            return pitchData;
+        }
+
+        // Calculate heatmap density
+        async function createHeatmap() {
+            const pitchData = await loadPitchData();
+            const heatmapDensity = Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => 0));
+            pitchData.forEach(pitch => {
+                const xIndex = Math.floor((pitch.x + 1) * 5);
+                const yIndex = Math.floor((pitch.y + 2) * 5);
+                heatmapDensity[yIndex][xIndex]++;
+            });
+
+            // Create heatmap cells
+            const heatmap = document.getElementById("heatmap");
+            for (let y = 0; y < 10; y++) {
+                for (let x = 0; x < 10; x++) {
+                    const cell = document.createElement("div");
+                    cell.className = "heatmap-cell";
+                    cell.style.width = "10%";
+                    cell.style.height = "10%";
+                    cell.style.left = (x * 10) + "%";
+                    cell.style.top = (y * 10) + "%";
+                    cell.style.opacity = heatmapDensity[y][x] / Math.max(...heatmapDensity.flat());
+                    heatmap.appendChild(cell);
+                }
+            }
+        }
+
+        // Call the function to create the heatmap
+        createHeatmap();
+    </script>
+</body>
 </html>
