@@ -1,39 +1,48 @@
-class Player:
-    def __init__(self, name):
-        self.name = name
-        self.hits = []
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clickable Spray Chart</title>
+    <style>
+        #field {
+            background-image: url('baseball_field.png'); /* Replace with your field image */
+            background-size: cover;
+            width: 800px;
+            height: 800px;
+            position: relative;
+            cursor: crosshair;
+        }
+    </style>
+</head>
+<body>
+    <div id="field">
+        <!-- SVG element to draw hits -->
+        <svg id="hits" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <!-- Placeholder for hits -->
+        </svg>
+    </div>
 
-    def record_hit(self, x, y):
-        self.hits.append((x, y))
+    <script>
+        const field = document.getElementById('field');
+        const hitsSvg = document.getElementById('hits');
 
-def main():
-    players = {}  # Dictionary to store player objects
-    num_players = int(input("Enter the number of players: "))
+        // Function to handle click event on the field
+        function handleFieldClick(event) {
+            const x = event.clientX - field.getBoundingClientRect().left;
+            const y = event.clientY - field.getBoundingClientRect().top;
 
-    for _ in range(num_players):
-        player_name = input("Enter player name: ")
-        players[player_name] = Player(player_name)
+            // Create a circle element to represent the hit
+            const hitCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            hitCircle.setAttribute('cx', x);
+            hitCircle.setAttribute('cy', y);
+            hitCircle.setAttribute('r', 5); // Adjust the radius as needed
+            hitCircle.setAttribute('fill', 'red');
 
-    inning = 1
-    while True:
-        print(f"Scoring Inning {inning}")
-        for player_name in players:
-            player = players[player_name]
-            x = int(input(f"Enter x-coordinate for {player_name}'s hit: "))
-            y = int(input(f"Enter y-coordinate for {player_name}'s hit: "))
-            player.record_hit(x, y)
+            // Append the circle to the SVG
+            hitsSvg.appendChild(hitCircle);
+        }
 
-        more_innings = input("Do you want to score another inning? (y/n): ")
-        if more_innings.lower() != "y":
-            break
-        inning += 1
-
-    # Display spray charts
-    for player_name in players:
-        player = players[player_name]
-        print(f"{player_name}'s Spray Chart:")
-        for hit in player.hits:
-            print(f"X: {hit[0]}, Y: {hit[1]}")
-
-if __name__ == "__main__":
-    main()
+        // Attach click event listener to the field
+        field.addEventListener('click', handleFieldClick);
+    </script>
+</body>
+</html>
