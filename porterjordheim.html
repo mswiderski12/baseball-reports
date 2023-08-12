@@ -1,58 +1,1572 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Baseball Strike Zone Heat Map</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-</head>
-<body>
-    <h1>Baseball Strike Zone Heat Map</h1>
-    
-    <input type="file" id="csvFileInput">
-    <button onclick="generateHeatMap()">Generate Strike Zone Heat Map</button>
-    
-    <div id="heatmap"></div>
-    
-    <script>
-        function generateHeatMap() {
-            const csvFileInput = document.getElementById("csvFileInput");
-            const file = csvFileInput.files[0];
-            
-            if (!file) {
-                alert("Please select a CSV file.");
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function (event) {
-                const text = event.target.result;
-                const rows = text.trim().split('\n');
-                
-                const data = [];
-                
-                for (let i = 1; i < rows.length; i++) {
-                    const [x, y] = rows[i].split(',').map(parseFloat);
-                    data.push({ x, y });
+var qid = location.search;
+   var PITCH_APP_DEFENSE = {
+
+    url: defenseChartUrl,
+
+   save_edit_pitch_url: pitcherChartSaveUrl,
+   video_report_url:APP_URL+'/video-report/',
+
+    eventsData: [],
+    activeEvent: null,
+
+    data: [],
+    activeIndex: null,
+
+    defaultVideoIndex: 0,
+    activeVideoIndex: null,
+
+    autoplay: false,
+
+    options: {
+        edit_pitch_mode: false,
+
+        editPitch: {
+            edit_pitch_module_selector: '#edit-pitch-module',
+            edit_pitch_form_selector: '#edit_pitch_form',
+            edit_pitch_btn_selector: '#edit_pitch_btn',
+            save_edit_pitch_btn_selector: '#save_edit_pitch_btn',
+            cancel_edit_pitch_btn_selector: '#cancel_edit_pitch_btn',
+            input_x_selector: '#edit_pitch_x_input',
+            input_y_selector: '#edit_pitch_y_input',
+            form_visible: false,
+        },
+
+        selectModule: {
+            //appendToSelector: '#pitch-select-module-def',
+        },
+        chartModule: {
+           /* appendToSelector: '#pitch-chart-module',
+            width: 500,
+            height: 281,
+            margins: {
+                top: 10,
+                right: 10,
+                bottom: 20,
+                left: 10,
+                xAxis: {
+                    left: 116,
+                    right: 104,
+                }},
+            pitchBg: '',
+            pitchBgAlpha: 0.3,
+            color: null,
+            defaultBallColor:'#b3b3b3',
+            ballHoverClass:"hovered",
+            ballActiveClass:"active",
+            svg: null,
+            mainGroup: null,
+            tooltip: null,
+            scaleX: null,
+            scaleY: null,
+            strikeZone:{
+                color: '#2ad146',
+                width: 1
+            },
+            heatmap: {
+                show: false,
+                instance: null,
+            },
+            topVelo: [],
+            topVeloNum: 5,
+            markTopVelo: true,
+
+            topSpin: [],
+            topSpinNum: 5,
+            markTopSpin: true,*/
+        },
+        videoModule: {
+            videoJs: null,
+            videoJsCache: null,
+            ready: false,
+            cache: true,
+            appendToSelector: '#defense-video-module'
+        },
+        tableModule:{
+            appendToSelector: '#defense-table-module',
+            rowActiveClass:"active",
+            tbody: null,
+            columns: [
+                {
+                    key: 'date',
+                    label: 'Date',
+                },
+                {
+                    key: 'event',
+                    label: 'Event',
+                },
+                {
+                    key: 'pitchType',
+                    label: 'Video Type',
+                },
+                /*{
+                    key: 'pitchResult',
+                    label: 'Result',
+                },
+                {
+                    key: 'exitvelo',
+                    label: 'Exit V',
+                    fixed: 1,
+                },*/
+                {
+                    key: 'videos',
+                    label: '',
+                },
+            ]
+        },
+    },
+
+    start: function(){
+        this.activeVideoIndex = this.defaultVideoIndex;
+
+        this.loadData();
+    },
+
+    loadData: function(){
+        var that = this;
+
+        d3.json(this.url, function (error, rawData) {
+            if (error) throw error;
+
+            var data = rawData['RECORDS'].map(function (d) {
+                var videos=[];
+                var videoSrc;
+                console.log(d);
+                if(typeof d["path"] != 'undefined' && d["path"] !== null){
+                    videoSrc = (''+d["path"]).trim();
+                    if(videoSrc.length > 0 ){
+                        videos.push({
+                            src: videoSrc
+                        });
+                    }
                 }
-                
-                // Filter data to display within strike zone (modify as needed)
-                const strikeZoneData = data.filter(point => point.x >= -1 && point.x <= 1 && point.y >= 1 && point.y <= 4);
-                
-                const trace = {
-                    x: strikeZoneData.map(point => point.x),
-                    y: strikeZoneData.map(point => point.y),
-                    type: "heatmap",
-                    colorscale: "Viridis"
-                };
-                
-                const layout = {
-                    title: "Baseball Strike Zone Heat Map"
-                };
-                
-                Plotly.newPlot("heatmap", [trace], layout);
-            };
-            
-            reader.readAsText(file);
+
+                /*if(typeof d["angle2"] != 'undefined' && d["angle2"] !== null){
+                    videoSrc = (''+d["angle2"]).trim();
+                    if(videoSrc.length > 0){
+                        videos.push({
+                            src: videoSrc
+                        });
+                    }
+                }
+
+                if(typeof d["angle3"] != 'undefined' && d["angle3"] !== null){
+                    videoSrc = (''+d["angle3"]).trim();
+                    if(videoSrc.length > 0){
+                        videos.push({
+                            src: videoSrc
+                        });
+                    }
+                }*/
+
+                return {
+                    playID: +d["playID"],
+                    //pitchSpeed: +d["pitchvelo"],
+                    //exitvelo: +d["exitvelo"],
+                    //pitchSpin: +d["pspin"],
+                    //pitchX: +d["pitchX"],
+                    //pitchY: +d["pitchY"],
+                    pitchType: (''+d["type"]).trim().toLowerCase(),
+                    //pitchResult: (''+d["presult"]).trim().toLowerCase(),
+                    eventID: +d["eventID"],
+                    event: (''+d["event"]).trim(),
+                    date: d["date"],
+                    videos: videos
+                }
+            });
+
+            that.eventsData = d3.nest()
+                .key(function(d) {  return d.eventID; })
+                .entries(data);
+
+            that.updateData();
+            that.initModules();
+            that.updateModules();
+
+            if(true === that.autoplay){
+                that.playNextVideo();
+            }
+        });
+    },
+
+    initModules: function(){
+        //this.initSelectModule();
+        this.initTableModule();
+
+        //this.initChart();
+
+        this.initAutoplayCheckbox();
+        this.initEditPitchModule();
+    },
+
+    // when data changes
+    updateModules: function(){
+        this.updateTableModule();
+        //this.updateChart();
+        this.updateEditPitchModule();
+    },
+
+    // when active item changes
+    animateModules:function(){
+        this.animateTableModule();
+        this.updateVideoModule();
+        //this.animateChart();
+        this.updateEditPitchModule();
+    },
+
+    updateData: function(){
+        var that = this;
+        that.data = d3.merge(
+            this.eventsData.map(function(d){
+                return d.values.filter(function(dd){
+                    if(that.activeEvent === null)
+                        return true;
+
+                    return dd.eventID == that.activeEvent;
+                })
+            })
+        );
+
+       // var top5Velo = that.data.slice(0); // clone array
+       // var top5Spin = that.data.slice(0); // clone array
+
+        //top5Velo.sort(function(x, y){
+            //return d3.descending(x.pitchSpeed, y.pitchSpeed);
+       // });
+
+        //top5Spin.sort(function(x, y){
+            //return d3.descending(x.pitchSpin, y.pitchSpin);
+        //});
+
+        //top5Velo = top5Velo.slice(0, that.options.chartModule.topVeloNum);
+        //top5Spin = top5Spin.slice(0, that.options.chartModule.topSpinNum);
+
+        //that.options.chartModule.topVelo = top5Velo;
+        //that.options.chartModule.topSpin = top5Spin;
+    },
+
+    ballManuallySelected: function(index){
+        this.setIndexAndAnimate(index);
+    },
+
+    setIndexAndAnimate: function(index){
+        this.setActiveIndex(index);
+        this.animateModules();
+    },
+
+    isActiveIndexSet: function(){
+        if(this.activeIndex !== null && this.activeIndex !== '')
+            return true;
+
+        return false;
+    },
+
+    setActiveIndex:function(index){
+        this.activeIndex = index;
+    },
+
+    hasVideo: function(data){
+        return data.videos.length;
+    },
+
+    // ============================== EDIT PITCH MODULE ==============================
+    initEditPitchModule: function(){
+        var that = this;
+        var options = this.options.editPitch;
+
+        var editPitchBtn = d3.select(options.edit_pitch_btn_selector)
+            .on('click', function(){
+                that.toggleEditPitchMode();
+            });
+
+        var cancelEditPitchBtn = d3.select(options.cancel_edit_pitch_btn_selector)
+            .on('click', function(){
+                that.stopEditPitchMode();
+            });
+
+        var saveEditPitchBtn = d3.select(options.save_edit_pitch_btn_selector)
+            .on('click', function(){
+                that.sendPitchSaveRequest();
+            });
+
+        if(this.options.edit_pitch_mode === false){
+            this.stopEditPitchMode();
+        }else{
+            this.startEditPitchMode();
         }
-    </script>
-</body>
-</html>
+    },
+
+    updateEditPitchModule: function(){
+        /*if( ! this.isActiveIndexSet()){
+            this.resetEditPitchForm();
+            return;
+        }
+
+        var data = this.data[this.activeIndex];
+
+        this.setEditPitchInputs(data['pitchX'], data['pitchY']);*/
+    },
+
+    resetEditPitchForm: function(){
+        this.setEditPitchInputs(null, null);
+    },
+
+    setEditPitchInputs: function(x, y){
+        var xInput = d3.select(this.options.editPitch.input_x_selector);
+        var yInput = d3.select(this.options.editPitch.input_y_selector);
+
+        xInput.attr('value', x);
+        yInput.attr('value', y);
+    },
+
+    sendPitchSaveRequest: function(){
+        /*var that = this;
+        if( ! this.isActiveIndexSet()){
+            return;
+        }
+
+        var data = this.data[this.activeIndex];
+
+        var http = new XMLHttpRequest();
+        var url = this.save_edit_pitch_url;
+        var x = d3.select(this.options.editPitch.input_x_selector).node().value.trim();
+        var y = d3.select(this.options.editPitch.input_y_selector).node().value.trim();
+
+        if(x=='' || y=='')
+            return;
+
+        var params = "playID="+data['playID']+"&x="+x+"&y="+y+"&pw_p_id="+qid;
+        http.open("POST", url, true);
+
+        //Send the proper header information along with the request
+        http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+        http.onreadystatechange = function() {//Call a function when the state changes.
+            if(http.readyState == 4 && http.status == 200) {
+                // success
+                // update data
+                if(that.isActiveIndexSet()){
+                    that.data[that.activeIndex]['pitchX'] = x;
+                    that.data[that.activeIndex]['pitchY'] = y;
+                }
+            }
+        };
+        http.send(params);*/
+    },
+
+    startEditPitchMode: function(){
+        /*this.options.edit_pitch_mode = true;
+        this.showEditPitchForm();*/
+    },
+
+    stopEditPitchMode: function(){
+       /* var that = this;
+        this.options.edit_pitch_mode = false;
+
+        if(this.isActiveIndexSet()){
+            var data = this.data[this.activeIndex];
+
+            var cx = that.ballXY(data).x;
+            var cy = that.ballXY(data).y;
+
+            that.setCxCyForActiveCircle(
+                cx,
+                cy
+            );
+        }
+
+        this.hideEditPitchForm();*/
+    },
+
+    toggleEditPitchMode: function(){
+        /*if(this.options.edit_pitch_mode === true){
+            this.stopEditPitchMode();
+        }else{
+            this.startEditPitchMode();
+        }*/
+    },
+
+    showEditPitchForm: function(){
+        /*var options = this.options.editPitch;
+
+        var editPitchForm = d3.select(options.edit_pitch_form_selector)
+            .style('display', 'block');
+
+        options.form_visible = true;*/
+    },
+
+    hideEditPitchForm: function(){
+        /*var options = this.options.editPitch;
+
+        var editPitchForm = d3.select(options.edit_pitch_form_selector)
+            .style('display', 'none');
+
+        options.form_visible = false;*/
+    },
+
+
+    // ============================== VIDEO MODULE ==============================
+    initVideoPlayer: function(){
+        var that = this;
+        var options = this.options.videoModule;
+
+        var outerBlock = d3.select(options.appendToSelector).html("");
+
+        var innerBlock = outerBlock
+            .append('div')
+            .attr('class', 'embed-responsive embed-responsive-16by9');
+
+        var videoTag = innerBlock.append('video')
+            .attr('class', 'pitch-video-js video-js embed-responsive-item');
+
+        var	videoUnsupportedWarn = videoTag.append('p')
+            .attr('class', 'vjs-no-js')
+            .html('To view this video please enable JavaScript, and consider upgrading to a web browser that <a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>');
+
+        options.videoJs = videojs(document.querySelector('.pitch-video-js'), {
+            aspectRatio: '16:9',
+            controls: true,
+            autoplay: false,
+            preload: 'auto',
+        });
+
+        options.videoJs.on('playing', function() {
+
+        });
+
+        options.videoJs.on('ended', function() {
+            if(true == that.autoplay){
+                that.playNextVideo();
+            }
+        });
+
+        options.videoJs.ready(function() {
+            that.onVideoPlayerReady();
+        });
+
+        if(options.cache === true){
+            var cacheInnerBlock = outerBlock
+                .append('div')
+                .style('width', '1px')
+                .style('height', '1px')
+                .attr('class', 'embed-responsive embed-responsive-16by9');
+
+            var cacheVideoTag = cacheInnerBlock.append('video')
+                .attr('class', 'video-js video-js-cache embed-responsive-item');
+
+            options.videoJsCache = videojs(document.querySelector('.video-js-cache'), {
+                aspectRatio: '16:9',
+                controls: true,
+                autoplay: false,
+                muted: true,
+                preload: 'auto',
+            });
+
+            var nextVideo = this.getNextVideoIndex();
+            var videoSrc = this.data[nextVideo.row]['videos'][nextVideo.index]['src'];
+
+            options.videoJsCache.src({
+                src: videoSrc,
+                type: 'video/mp4'
+            });
+
+            options.videoJsCache.on('loadedmetadata', function() {
+                var video = this.children_[0];
+
+                if (video.buffered.length === 0) return;
+
+                var bufferedSeconds = video.buffered.end(0) - video.buffered.start(0);
+                console.log(bufferedSeconds + ' seconds of video are ready to play!');
+            });
+        }
+    },
+
+    onVideoPlayerReady: function(){
+        this.options.videoModule.ready = true;
+        this.options.videoModule.videoJs.play();
+    },
+
+    updateVideoModule: function(){
+        var options = this.options.videoModule;
+
+        this.disposeVideoPlayer();
+
+        if(this.isActiveIndexSet()){
+            var datum = this.data[this.activeIndex];
+
+            if(this.hasVideo(datum)){
+				var videoPlayerPath=datum['videos'][this.activeVideoIndex]['src'];
+				if(videoPlayerPath.includes('PWSoutheastFull/')){
+					alert('Divx Player will coming soon....');
+					return false;
+				}else{
+					$([document.documentElement, document.body]).animate({
+					scrollTop: $("#defense-video-module").offset().top
+					}, 2000,'linear');
+					this.initVideoPlayer();
+				}
+                
+
+                if(typeof datum['videos'][this.activeVideoIndex] == 'undefined')
+                    this.setVideoActiveIndex(this.defaultVideoIndex);
+
+                this.setVideoSrc(datum['videos'][this.activeVideoIndex]['src']);
+            }
+
+            this.highlightVideoIcon();
+        }
+    },
+
+    setVideoSrc: function(videoSrc){
+        this.options.videoModule.videoJs.src({
+            src: videoSrc,
+            type: 'video/mp4'
+        });
+    },
+
+    playNextVideo: function(){
+        if( ! this.datasetHasVideo())
+            return;
+
+        var currentVideoIndex = this.getCurrentVideoIndex();
+        var nextVideoIndex = this.getNextVideoIndex();
+
+        this.setVideoActiveIndex(nextVideoIndex.index);
+
+        if(currentVideoIndex.row === nextVideoIndex.row){
+            this.updateVideoModule();
+        }else{
+            this.setIndexAndAnimate(nextVideoIndex.row)
+        }
+    },
+
+    datasetHasVideo: function(){
+        for(var i=0; i < this.data.length; i++){
+            if(this.hasVideo(this.data[i]))
+                return true;
+        }
+
+        return false;
+    },
+
+    getCurrentVideoIndex: function(){
+        return {
+            row: this.activeIndex,
+            index: this.activeVideoIndex,
+        };
+    },
+
+    getNextVideoIndex: function(){
+        var nextVideo = this.getCurrentVideoIndex();
+
+        do{
+            if(nextVideo.row === null || nextVideo.index === null){
+                nextVideo = {
+                    row: 0,
+                    index: this.defaultVideoIndex,
+                };
+            }else{
+                nextVideo['index']++;
+            }
+
+            if(typeof this.data[nextVideo['row']]['videos'][nextVideo['index']] === 'undefined'){
+                nextVideo['index'] = this.defaultVideoIndex;
+                nextVideo['row']++;
+
+                if(typeof this.data[nextVideo['row']] === 'undefined'){
+                    nextVideo['row'] = 0;
+                }
+            }
+        }while(typeof this.data[nextVideo['row']]['videos'][nextVideo['index']] === 'undefined')
+
+        return nextVideo;
+    },
+
+    startAutoplay: function(){
+        if(this.autoplay === true)
+            return;
+
+        this.autoplay = true;
+
+        var autoplayCheckbox = d3.select("#defense-autoplay-checkbox");
+        autoplayCheckbox.node().checked = this.autoplay;
+
+        this.playNextVideo();
+    },
+
+    stopAutoplay: function(){
+        if(this.autoplay === false)
+            return;
+
+        this.autoplay = false;
+
+        var autoplayCheckbox = d3.select("#defense-autoplay-checkbox");
+        autoplayCheckbox.node().checked = this.autoplay;
+    },
+
+    initAutoplayCheckbox: function(){
+        var that = this;
+        var autoplayCheckbox = d3.select("#defense-autoplay-checkbox");
+
+        if(autoplayCheckbox.size() <= 0)
+            return;
+
+        autoplayCheckbox.node().checked = that.autoplay;
+
+        autoplayCheckbox.on("change", function(){
+            !!this.checked ? that.startAutoplay() : that.stopAutoplay();
+        });
+    },
+
+    disposeVideoPlayer: function(){
+        if(this.options.videoModule.videoJs !== null){
+            try{
+                this.options.videoModule.videoJs.dispose();
+            }catch (e){
+                console.log(e);
+            }
+            this.options.videoModule.videoJs = null;
+            this.options.videoModule.ready = false;
+        }
+
+        if(this.options.videoModule.cache === true && this.options.videoModule.videoJsCache !== null){
+            try{
+                this.options.videoModule.videoJsCache.dispose();
+            }catch (e){
+                console.log(e);
+            }
+            this.options.videoModule.videoJsCache = null;
+        }
+    },
+
+    // ============================== TABLE MODULE ==============================
+
+    initTableModule: function() {
+        var options = this.options.tableModule;
+
+        var table = d3.select(options.appendToSelector).append('table')
+            .attr('class', 'table table-bordered');
+        var thead = table.append('thead');
+        options.tbody = table.append('tbody');
+
+        // append the header row
+        thead.append('tr')
+            .selectAll('th')
+            .data(options.columns)
+            .enter()
+            .append('th')
+            .text(function (column) { return column.label; });
+    },
+
+    updateTableModule:function(){
+        var that = this;
+        var options = this.options.tableModule;
+
+        // create a row for each object in the data
+        var rowsSelection = options.tbody.selectAll('tr')
+            .data(this.data);
+
+        rowsSelection.exit().remove();
+
+        var rowsEnter = rowsSelection
+            .enter()
+            .append('tr')
+            .on('click', function(d, i){
+				console.log(i);
+                PITCH_APP_DEFENSE.ballManuallySelected(i);
+            });
+
+        var rows = rowsSelection.merge(rowsEnter);
+
+        // create a cell in each row for each column
+        var cellsSelection = rows.selectAll('td')
+            .data(function (row, i) {
+                return options.columns.map(function (column) {
+                    var value, type;
+                    switch(column.key){
+                        case 'videos':
+                            type = 'videos';
+                            value = row.videos;
+                            break;
+                        case 'date':
+                            type = 'string';
+                            value = row[column.key];
+                            break;
+                        case 'event':
+                            type = 'string';
+                            value = row[column.key];
+                            break;
+                        case 'pitchType':
+                            type = 'string';
+                            switch(row[column.key]){
+                                /*case 'fastball':
+                                    value = 'FB';
+                                    break;
+                                case 'curveball':
+                                    value = 'CB';
+                                    break;
+                                case 'slider':
+                                    value = 'SL';
+                                    break;
+                                case 'changeup':
+                                    value = 'CH';
+                                    break;
+                                case 'cutter':
+                                    value = 'CUT';
+                                    break;
+                                case 'splitter':
+                                    value = 'SPL';
+                                    break;
+                                case 'knuckleball':
+                                    value = 'KN';
+                                    break;
+                                case 'screwball':
+                                    value = 'SCR';
+                                    break;
+                                case 'forkbal':
+                                    value = 'FK';
+                                    break;*/
+                                default:
+                                    value = row[column.key];
+                                    break;
+                            }
+                            break;
+                        /*case 'pitchResult':
+                            type = 'string';
+                            value = row[column.key];
+                            break;*/
+                        default:
+                            type = 'number';
+                            value = parseFloat(row[column.key]).toFixed(column.fixed);
+
+                            if(value <= 0)
+                                value = '';
+                            break;
+                    }
+                    return {
+                        type: type,
+                        value: value
+                    };
+                });
+            });
+
+        var cellsEnter = cellsSelection
+            .enter()
+            .append('td');
+
+        var cells = cellsSelection.merge(cellsEnter);
+
+        cells.each(function (d) {
+            var el = d3.select(this);
+            switch(d.type){
+                case 'videos':
+                    el.html('');
+                    el.append('div')
+                        .attr('class', 'text-nowrap').selectAll('i').data(d.value)
+                        .enter().append('i')
+                        .attr('class', function(d,i){
+                            if(i>0){
+                                   return 'fa fa-video fa-rotate-315 d3-defense-second-video'; 
+                            }else{
+                                    return 'fa fa-video d3-defense-first-video';
+                            }
+                        }).style('margin-right', '6px')
+                        .on('click', function(d, video_i){
+							that.onClickVideoIcon(video_i);
+                        });
+						
+						el
+                        .selectAll('.text-nowrap')
+						.append("input")
+						.attr("type", "checkbox")
+						.attr("class", "exportVideoCheckbox")
+						.style('margin-right', '5px')
+						.on('click', function(d, video_i){
+							d3.event.stopPropagation();
+							var videoPath=$(this).parents('.text-nowrap').find('.defense-profile-download:first').data('url');
+							EXPORTVIDEOARR.push(videoPath);
+							console.log(videoPath);
+							
+                        });
+						/*if($('.d3-defense-second-video').length>0){
+							el
+							.selectAll('.text-nowrap')
+							.append("input")
+							.attr("type", "checkbox")
+							.attr("class", "exportVideoCheckbox")
+							.style('margin-right', '5px')
+							.on('click', function(d, video_i){
+								d3.event.stopPropagation();
+								var videoPath=$(this).parents('.text-nowrap').find('.player-profile-download-2').data('url');
+								EXPORTVIDEOARR.push(videoPath);
+								console.log(videoPath);
+							});
+						}*/
+						
+						el
+                        .selectAll('.text-nowrap')
+						.append('i')
+                        .attr('class', function(d,i){
+                            if(i > 0){
+                                return 'fa fa-download defense-profile-download';
+                            }else{
+                                return 'fa fa-download defense-profile-download';
+                            }
+                        })
+						.on('click', function(d, video_i){
+							return false;
+                        });
+						
+						el
+						.selectAll('.defense-profile-download')
+                        .attr('data-url', function(d,i){
+                            if(i > 0){
+                               return d.value[0].src;
+                            }else{
+                                return d.value[0].src;
+                            }
+                        });
+						
+						/*if(d.value[1]){
+							el
+                        .selectAll('.text-nowrap')
+						.append('i')
+                        .attr('class', function(d,i){
+                            if(i > 0){
+                                return 'fa  fa-rotate-315 fa-download defense-profile-download-2';
+                            }else{
+                                return 'fa   fa-rotate-315 fa-download defense-profile-download-2';
+                            }
+                        })
+						.on('click', function(d, video_i){
+							return false;
+                        });
+						
+						el
+						.selectAll('.defense-profile-download-2')
+                        .attr('data-url', function(d,i){
+                            if(i > 0){
+                                return d.value[1].src;
+                            }else{
+                                return d.value[1].src;
+                            }
+                        });
+						}*/
+
+                        
+						el
+                        .selectAll('.text-nowrap')
+						.append('i')
+                        .attr('class', function(d,i){
+                            if(i > 0){
+                                return 'fa fa-bug player-profile-defense-report';
+                            }else{
+                                return 'fa fa-bug player-profile-defense-report';
+                            }
+                        })
+						.on('click', function(d, video_i){
+							d3.event.stopPropagation();
+							that.VideoReportAjax($(this).closest('tr').index());
+                        });
+						
+						
+						
+                    break;
+
+                case 'string':
+                case 'number':
+                    el.html(function (d) { return d.value; });
+                    break;
+            }
+        });
+
+        this.clearAllActiveRows();
+    },
+
+    animateTableModule: function(){
+        this.setRowActive(this.activeIndex);
+    },
+	VideoReportAjax(vIndex){
+		if(confirm('This button reports a bug to Scoutcast that the player in the video is not the correct player. Are you sure you want to list this video as a bug?')){
+			document.getElementById('hiddenTableTypeId').value=this.data[vIndex]['playID'];
+			document.getElementById('hiddenTableType').value='scouting_history';
+			openVideoErrorPop();
+		}
+		
+	},
+
+    onClickVideoIcon: function(video_index){
+        this.setVideoActiveIndex(video_index);
+    },
+	onClickVideoDownloadIcon:function(video_index){
+        
+		//video_index.click();
+	},
+
+    setVideoActiveIndex: function(index){
+        this.activeVideoIndex = index;
+    },
+
+    setRowActive: function(index){
+        var options = this.options.tableModule;
+
+        // only one active
+        this.clearAllActiveRows();
+
+        var tr = options.tbody.selectAll('tr').filter(function(d,i){return i === index});
+        if(tr.size() > 0){
+            var alreadyIsActive = tr.classed(options.rowActiveClass);
+
+            if( ! alreadyIsActive){
+                tr.classed(options.rowActiveClass, ! alreadyIsActive);
+            }
+        }
+    },
+
+    clearAllActiveRows: function(){
+        var options = this.options.tableModule;
+
+        options.tbody.selectAll('tr')
+            .classed(options.rowActiveClass, false);
+    },
+
+    highlightVideoIcon: function(){
+        var videoOptions = this.options.videoModule;
+
+        this.extinguishAllVideoIcons();
+ 
+        d3.select('#defense-table-module tr.active .fa-video-camera:nth-child('+(1+this.activeVideoIndex)+')').classed('green', true);
+    },
+
+    extinguishAllVideoIcons: function(){
+        d3.selectAll('#defense-table-module .fa-video-camera').classed('green', false);
+    },
+
+
+    // ============================== CHART MODULE ==============================
+    /*initChart: function(){
+        var that = this;
+        var options = this.options.chartModule;
+
+        var chartWidth = options.width - options.margins.left - options.margins.right,
+            chartHeight = options.height - options.margins.top - options.margins.bottom;
+
+        options.svg = d3.select(options.appendToSelector)
+            .append("svg")
+            .attr("width", options.width)
+            .attr("height", options.height)
+            .on('click', function() {
+                var coords = d3.mouse(this);
+
+                if(false === that.options.edit_pitch_mode || ! that.isActiveIndexSet())
+                    return;
+
+                var cx = coords[0] - that.options.chartModule.margins.left;
+                var cy = coords[1] - that.options.chartModule.margins.top;
+
+                that.setCxCyForActiveCircle(
+                    cx,
+                    cy
+                );
+
+                // set inputs
+                that.setEditPitchInputs(
+                    that.options.chartModule.scaleX.invert(cx-that.options.chartModule.margins.xAxis.left).toFixed(3),
+                    that.options.chartModule.scaleY.invert(cy).toFixed(3)
+                );
+            });
+
+        // background image
+        options.svg.append("svg:defs")
+            .append("svg:pattern")
+            .attr("id", "pitch-bg")
+            .attr('patternUnits', 'userSpaceOnUse')
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr('width', options.width)
+            .attr('height', options.height)
+            .append("svg:image")
+            .attr("xlink:href", options.pitchBg)
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr('width', options.width)
+            .attr('height', options.height);
+
+        options.svg.append("rect")
+            .attr('id', 'pitch-bg-rect')
+            .attr('fill', 'url(#pitch-bg)')
+            .attr('width', options.width)
+            .attr('height', options.height);
+
+        options.mainGroup = options.svg.append('g')
+            .attr('transform', 'translate(' + options.margins.left + ',' + options.margins.top + ')')
+            .attr('id', options.id);
+
+        options.scaleX = d3.scaleLinear()
+            .domain([-4, 4])
+            .range([0, chartWidth - options.margins.xAxis.left - options.margins.xAxis.right]);
+
+        options.scaleY = d3.scaleLinear()
+            .domain([0, 6])
+            .range([chartHeight, 0]);
+
+        options.color = d3.scaleOrdinal()
+            .domain(["fastball", "curveball", "changeup", "slider", "knuckleball", "splitter"])
+            .range(["red", "blue", "yellow", "green", "purple", "orange", "#b3b3b3"]);
+
+
+        this.initHeatmapCheckbox();
+        this.initMarkTopVeloCheckbox();
+        this.initMarkTopSpinCheckbox();
+
+        // tooltip
+        options.tooltip = d3.select("body")
+            .append("div")
+            .attr("class", "pitch-tooltip")
+            .style("opacity", 0);
+
+        // strikeZone
+        var strikeZone = options.svg.append('g')
+            .attr('transform', 'translate(' + (options.scaleX(-1.1) + options.margins.left + options.margins.xAxis.left) + ',' + (options.scaleY(3.5) + options.margins.top) + ')');
+
+        strikeZone.append('rect')
+            .attr('width', options.scaleX(1.1) - options.scaleX(-1.1))
+            .attr('height', options.scaleY(1.0) - options.scaleY(3.5))
+            .attr('fill', 'none')
+            .attr('stroke', options.strikeZone.color)
+            .attr('stroke-width', options.strikeZone.width);
+
+        // axes
+        var axisXGroup = options.svg.append('g')
+            .attr('transform', 'translate(' + (options.margins.left + options.margins.xAxis.left) + ',' + (options.height - options.margins.bottom) + ')');
+
+        var axisX = d3.axisBottom(options.scaleX);
+        axisXGroup.call(axisX);
+
+        var axisYGroup = options.svg.append('g')
+            .attr('transform', 'translate(' + (options.margins.left + options.margins.xAxis.left + options.scaleX(0)) + ',' + options.margins.top + ')');
+
+        var axisY = d3.axisLeft(options.scaleY).ticks(6);
+        axisYGroup.call(axisY);
+
+        this.styleAxis();
+
+        // labels
+        var labels = [
+            {
+                color: options.color('fastball'),
+                label: 'Fastball'
+            },
+            {
+                color: options.color('curveball'),
+                label: 'Curveball'
+            },
+            {
+                color: options.color('changeup'),
+                label: 'Changeup'
+            },
+            {
+                color: options.color('slider'),
+                label: 'Slider'
+            },
+            {
+                color: options.color('knuckleball'),
+                label: 'Knuckleball'
+            },
+            {
+                color: options.color('splitter'),
+                label: 'Splitter'
+            },
+        ]
+
+        var legends = options.mainGroup.selectAll('rect.legend')
+            .data(labels);
+
+        legends
+            .enter()
+            .append('rect')
+            .attr('class', 'legend')
+            .attr('width', 10)
+            .attr('height', 10)
+            .attr('fill', function(d){return d.color;})
+            .attr('transform', function(d,i) {return 'translate(' + options.margins.left + ',' + (options.margins.top + i*15) + ')'})
+
+        legends
+            .enter()
+            .append('text')
+            .text(function(d){return d.label;})
+            .attr('fill', 'white')
+            .attr('font-size', '12px')
+            .attr('x', 13 + options.margins.left)
+            .attr('y', function(d,i){return options.margins.top + 9+i*15})
+    },
+
+    initHeatmap: function(){
+        var that = this;
+        var options = this.options.chartModule;
+
+        var heatmapWidth = options.width,
+            heatmapHeight = options.height;
+
+        var heatmapWrapper = d3.select(options.appendToSelector)
+            .append("div")
+            .attr("class", 'pitch-heatmap-wrapper')
+            .style("width", heatmapWidth+"px")
+            .style("height", heatmapHeight+"px");
+
+        var heatmap = heatmapWrapper
+            .append('div')
+            .attr("class", 'pitch-heatmap');
+
+
+// minimal heatmap instance configuration
+        options.heatmap.instance = h337.create({
+            // only container is required, the rest will be defaults
+            container: document.querySelector('.pitch-heatmap'),
+        });
+    },
+
+    initHeatmapCheckbox: function(){
+        var that = this;
+        var heatmapCheckbox = d3.select("#pitch-heatmap-checkbox");
+
+        heatmapCheckbox.on("change", function(){
+            that.options.chartModule.heatmap.show = !!this.checked;
+            that.onHeatmapCheckboxChange();
+        });
+    },
+
+    onHeatmapCheckboxChange: function(){
+        this.drawBackground();
+    },
+
+    drawBackground: function () {
+        var that = this;
+        var options = this.options.chartModule;
+
+        if(true === options.heatmap.show){
+            that.drawHeatmap();
+
+            d3.select('#pitch-bg-rect').attr('opacity', options.pitchBgAlpha);
+        }else{
+            that.clearHeatmap();
+
+            d3.select('#pitch-bg-rect').attr('opacity', 1.0);
+        }
+    },
+
+    setCxCyForActiveCircle: function(cx, cy){
+        var that = this;
+        var options = this.options.chartModule;
+
+        var circle = options.svg.selectAll('path.pitch-ball')
+            .filter(function (d, i) {
+                return i === that.activeIndex;
+            });
+
+        if(circle.size() <= 0)
+            return;
+
+        circle.attr('transform', function(d, i){
+            return 'translate(' + (cx) + ','+ (cy) +')';
+        });
+    },
+
+    drawHeatmap: function(){
+        var that = this;
+        var options = this.options.chartModule;
+
+        // now generate some random data
+        var points = [];
+        var max = 1;
+
+        if(options.heatmap.instance === null){
+            this.initHeatmap();
+        }
+
+        for(var i=0; i < that.data.length; i++){
+            var coordinates = that.ballXY(that.data[i]);
+
+            var point = {
+                x: Math.round(coordinates.x + options.margins.left),
+                y: Math.round(coordinates.y + options.margins.top),
+                value: 0.7
+            };
+            points.push(point);
+        }
+
+// heatmap data format
+        var data = {
+            max: max,
+            data: points
+        };
+// if you have a set of datapoints always use setData instead of addData
+// for data initialization
+        options.heatmap.instance.setData(data);
+    },
+
+    clearHeatmap: function(){
+        var that = this;
+        var options = this.options.chartModule;
+
+        if(options.heatmap.instance === null)
+            return;
+
+        options.heatmap.instance.setData({
+            max: 0,
+            min: 0,
+            data: [
+
+            ]
+        });
+    },
+
+    initMarkTopVeloCheckbox: function(){
+        var that = this;
+        var el = d3.select("#markTopVelo");
+
+        if(el.size() <= 0)
+            return;
+
+        el.node().checked = that.options.chartModule.markTopVelo;
+
+        el.on("change", function(){
+            that.options.chartModule.markTopVelo = !!this.checked;
+            that.updateChart();
+        });
+    },
+
+    initMarkTopSpinCheckbox: function(){
+        var that = this;
+
+        var el = d3.select("#markTopSpin");
+
+        if(el.size() <= 0)
+            return;
+
+        el.node().checked = that.options.chartModule.markTopSpin;
+
+        el.on("change", function(){
+            that.options.chartModule.markTopSpin = !!this.checked;
+            that.updateChart();
+        });
+    },
+
+    isInTopVelo: function(d){
+        for(var i = 0; i < this.options.chartModule.topVelo.length; i++){
+            if(this.options.chartModule.topVelo[i]['playID'] === d['playID'])
+                return true;
+        }
+
+        return false;
+    },
+
+    isInTopSpin: function(d){
+        for(var i = 0; i < this.options.chartModule.topSpin.length; i++){
+            if(this.options.chartModule.topSpin[i]['playID'] === d['playID'])
+                return true;
+        }
+
+        return false;
+    },
+
+    updateChart: function(){
+        var that = this;
+        var options = this.options.chartModule;
+
+        var symbol = d3.symbol().size(50);
+
+        var circlesSelection = options.mainGroup.selectAll('path.pitch-ball')
+            .data(this.data);
+
+        circlesSelection.exit().remove();
+
+        var circlesEnter = circlesSelection
+            .enter()
+            .append('path')
+            .attr('class', 'pitch-ball')
+            .on('click', function(d, i) {
+                var el = d3.select(this);
+
+                if(true === that.options.edit_pitch_mode && that.isActiveIndexSet())
+                    return;
+
+                that.ballManuallySelected(i);
+            })
+            .on('mouseenter', function(d) {
+                var el = d3.select(this);
+
+                // tooltip
+                options.tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .8);
+
+                options.tooltip.html(parseFloat(d.pitchSpeed).toFixed(1)+' mph')
+                    .style("left", (d3.event.pageX + 5) + "px")
+                    .style("top", (d3.event.pageY - 28 - 5) + "px");
+
+                // classes
+                el.classed(options.ballHoverClass, true);
+            })
+            .on('mouseout', function(d) {
+                var el = d3.select(this);
+
+                // tooltip
+                options.tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+
+                // classes
+                el.classed(options.ballHoverClass, false);
+            });
+
+        var circles = circlesSelection.merge(circlesEnter);
+
+        circles
+            .attr("d", symbol.type(function (d) {
+                if(options.markTopVelo && that.isInTopVelo(d)){
+                    return d3.symbolStar;
+                }
+
+                if(options.markTopSpin && that.isInTopSpin(d)){
+                    return d3.symbolStar;
+                }
+
+                return d3.symbolCircle;
+            }))
+            .attr('fill', function(d,i){return options.color(d.pitchType)})
+            .attr('transform', function(d, i){
+                var coords = that.ballXY(d);
+                return 'translate(' + (coords.x) + ','+ (coords.y) +')';
+            });
+
+        this.clearAllActiveCircles();
+        this.drawBackground();
+    },
+
+    animateChart: function(){
+        var that = this;
+        var options = this.options.chartModule;
+
+        this.clearAllActiveCircles();
+
+        var el = options.mainGroup.selectAll('path.pitch-ball').filter(function(d,i){return i===that.activeIndex});
+
+        if(el.size() <= 0)
+            return;
+
+        // only one active
+        var alreadyIsActive = el.classed(options.ballActiveClass);
+
+        if( ! alreadyIsActive){
+            el.classed(options.ballActiveClass, ! alreadyIsActive);
+            el.classed(options.ballHoverClass, false);
+        }
+    },
+
+    clearAllActiveCircles: function(){
+        var options = this.options.chartModule;
+
+        options.mainGroup.selectAll('path.pitch-ball')
+            .classed(options.ballActiveClass, false);
+    },
+
+    styleAxis: function(){
+        var that = this;
+        var options = this.options.chartModule;
+
+        options.svg.selectAll('path.domain').attr('stroke', '#DEDEDE');
+        options.svg.selectAll('g.tick line').attr('stroke', '#DEDEDE');
+        options.svg.selectAll('g.tick text').attr('fill', '#DEDEDE');
+    },
+
+    ballXY: function(d){
+        var that = this;
+        var options = this.options.chartModule;
+
+        return {
+            x: options.margins.xAxis.left + options.scaleX(d.pitchX),
+            y: options.scaleY(d.pitchY),
+        }
+    },
+
+    // ============================== SELECT MODULE ==============================
+
+    initSelectModule:function(){
+        var options = this.options.selectModule;
+        var select = d3.select(options.appendToSelector).append('select')
+            .attr('name', 'active_event')
+            .attr('class', 'form-control');
+
+        var nullOption = select.append('option')
+            .attr('value', '')
+            .text('ALL PITCHES');
+
+        for(var i=0; i < this.eventsData.length; i++){
+            select.append('option')
+                .attr('value', this.eventsData[i].values[0].eventID)
+                .text(this.eventsData[i].values[0].eventName);
+        }
+
+        select.on('change', this.onSelectChange);
+    },
+
+    onSelectChange: function (e) {
+        var old = PITCH_APP_DEFENSE.activeEvent;
+        PITCH_APP_DEFENSE.activeEvent = this.value.length > 0 ? this.value : null;
+
+        if(old != PITCH_APP_DEFENSE.activeEvent){
+            PITCH_APP_DEFENSE.onActiveEventChange();
+        }
+    },
+
+    onActiveEventChange: function(){
+        this.setActiveIndex(null);
+        this.setVideoActiveIndex(this.defaultVideoIndex);
+
+        this.updateData();
+        this.updateModules();
+        this.updateVideoModule();
+
+        if(true === this.autoplay){
+            this.playNextVideo();
+        }
+    },
+
+    // ============================== EXPORT MODULE ==============================
+    export: function(){
+        var svgString = this.getSVGString(this.options.chartModule.svg.node());
+
+        this.svgString2Image( svgString, 2 * this.options.chartModule.width, 2 * this.options.chartModule.height, 'png', save ); // passes Blob and filesize String to the callback
+
+        function save( dataBlob, filesize ){
+            saveAs( dataBlob, 'pitches_chart.png' ); // FileSaver.js function
+        }
+    },
+
+    // Below are the functions that handle actual exporting:
+    // getSVGString ( svgNode ) and svgString2Image( svgString, width, height, format, callback )
+    getSVGString: function( svgNode ) {
+        svgNode.setAttribute('xlink', 'http://www.w3.org/1999/xlink');
+        var cssStyleText = getCSSStyles( svgNode );
+        appendCSS( cssStyleText, svgNode );
+
+        var serializer = new XMLSerializer();
+        var svgString = serializer.serializeToString(svgNode);
+        svgString = svgString.replace(/(\w+)?:?xlink=/g, 'xmlns:xlink='); // Fix root xlink without namespace
+        svgString = svgString.replace(/NS\d+:href/g, 'xlink:href'); // Safari NS namespace fix
+
+        return svgString;
+
+        function getCSSStyles( parentElement ) {
+            var selectorTextArr = [];
+
+            // Add Parent element Id and Classes to the list
+            selectorTextArr.push( '#'+parentElement.id );
+            for (var c = 0; c < parentElement.classList.length; c++)
+                if ( !contains('.'+parentElement.classList[c], selectorTextArr) )
+                    selectorTextArr.push( '.'+parentElement.classList[c] );
+
+            // Add Children element Ids and Classes to the list
+            var nodes = parentElement.getElementsByTagName("*");
+            for (var i = 0; i < nodes.length; i++) {
+                var id = nodes[i].id;
+                if ( !contains('#'+id, selectorTextArr) )
+                    selectorTextArr.push( '#'+id );
+
+                var classes = nodes[i].classList;
+                for (var c = 0; c < classes.length; c++)
+                    if ( !contains('.'+classes[c], selectorTextArr) )
+                        selectorTextArr.push( '.'+classes[c] );
+            }
+
+            // Extract CSS Rules
+            var extractedCSSText = "";
+            for (var i = 0; i < document.styleSheets.length; i++) {
+                var s = document.styleSheets[i];
+
+                try {
+                    if(!s.cssRules) continue;
+                } catch( e ) {
+                    if(e.name !== 'SecurityError') throw e; // for Firefox
+                    continue;
+                }
+
+                var cssRules = s.cssRules;
+                for (var r = 0; r < cssRules.length; r++) {
+                    if ( contains( cssRules[r].selectorText, selectorTextArr ) )
+                        extractedCSSText += cssRules[r].cssText;
+                }
+            }
+
+
+            return extractedCSSText;
+
+            function contains(str,arr) {
+                return arr.indexOf( str ) === -1 ? false : true;
+            }
+
+        }
+
+        function appendCSS( cssText, element ) {
+            var styleElement = document.createElement("style");
+            styleElement.setAttribute("type","text/css");
+            styleElement.innerHTML = cssText;
+            var refNode = element.hasChildNodes() ? element.children[0] : null;
+            element.insertBefore( styleElement, refNode );
+        }
+    },
+
+    svgString2Image: function( svgString, width, height, format, callback ) {
+        var that = this;
+        var format = format ? format : 'png';
+
+        var imgsrc = 'data:image/svg+xml;base64,'+ btoa( unescape( encodeURIComponent( svgString ) ) ); // Convert SVG string to data URL
+
+        var canvas = document.createElement("canvas");
+        var context = canvas.getContext("2d");
+
+        canvas.width = width;
+        canvas.height = height;
+
+        var image = new Image();
+        image.onload = function() {
+            context.clearRect ( 0, 0, width, height );
+
+            var backgroundImage = new Image();
+            backgroundImage.onload = function(){
+                if(that.options.chartModule.heatmap.show){
+                    var heatmapDataURL = that.options.chartModule.heatmap.instance.getDataURL();
+                    var heatmap = new Image();
+                    heatmap.onload = function(){
+                        context.globalAlpha = that.options.chartModule.pitchBgAlpha;
+                        context.drawImage(backgroundImage, 0, 0, width, height);
+                        context.globalAlpha = 1.0;
+                        context.drawImage(heatmap, 0, 0, width, height);
+                        context.drawImage(image, 0, 0, width, height);
+
+                        that.onAllImagesLoad(canvas, callback);
+                    };
+                    heatmap.src = heatmapDataURL;
+                }else{
+                    context.drawImage(backgroundImage, 0, 0, width, height);
+                    context.drawImage(image, 0, 0, width, height);
+                                        //
+                    that.onAllImagesLoad(canvas, callback);
+                }
+
+            };
+            backgroundImage.src = that.options.chartModule.pitchBg;
+        };
+
+        image.src = imgsrc;
+    },
+
+    onAllImagesLoad: function(canvas, callback){
+        canvas.toBlob( function(blob) {
+            var filesize = Math.round( blob.length/1024 ) + ' KB';
+            if ( callback ) callback( blob, filesize );
+        });
+    }*/
+};
+
+PITCH_APP_DEFENSE.start();
