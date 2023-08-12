@@ -1,38 +1,68 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Baseball Pitching Heat Map</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <title>Baseball Strike Zone Heat Map</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .strike-zone {
+            width: 300px;
+            height: 450px;
+            border: 2px solid #333;
+            position: relative;
+            margin: 50px auto;
+        }
+
+        .heatmap {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 255, 0.2);
+        }
+    </style>
 </head>
 <body>
-    <h1>Baseball Pitching Heat Map</h1>
-    <div id="heatmap"></div>
+    <h1>Baseball Strike Zone Heat Map</h1>
+
+    <div class="strike-zone">
+        <div class="heatmap" id="heatmap"></div>
+    </div>
 
     <script>
-        // Load data from CSV
-        Plotly("Untitled spreadsheet.xlsx - Sheet1 (1).csv", function (data) {
-            const x = data.map(row => parseFloat(row.x));
-            const y = data.map(row => parseFloat(row.y));
-            
-            const trace = {
-                x: x,
-                y: y,
-                mode: "markers",
-                type: "heatmap",
-                colorscale: "Viridis",
-                showscale: true
-            };
-            
-            const layout = {
-                title: "Pitching Heat Map",
-                xaxis: { title: "Horizontal Location" },
-                yaxis: { title: "Vertical Location" }
-            };
-            
-            const config = { responsive: true };
-            
-            Plotly.newPlot("heatmap", [trace], layout, config);
+        // Simulated pitch data (Untitled spreadsheet.xlsx - Sheet1 (1).csv)
+        const pitchData = [
+            { x: 0, y: 0 },
+            { x: 1, y: 1 },
+            { x: -1, y: -1 },
+            // ... add more data points
+        ];
+
+        // Calculate heatmap density
+        const heatmapDensity = Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => 0));
+        pitchData.forEach(pitch => {
+            const xIndex = Math.floor((pitch.x + 1) * 5);
+            const yIndex = Math.floor((pitch.y + 2) * 5);
+            heatmapDensity[yIndex][xIndex]++;
         });
+
+        // Create heatmap cells
+        const heatmap = document.getElementById("heatmap");
+        for (let y = 0; y < 10; y++) {
+            for (let x = 0; x < 10; x++) {
+                const cell = document.createElement("div");
+                cell.className = "heatmap-cell";
+                cell.style.width = "10%";
+                cell.style.height = "10%";
+                cell.style.left = (x * 10) + "%";
+                cell.style.top = (y * 10) + "%";
+                cell.style.opacity = heatmapDensity[y][x] / Math.max(...heatmapDensity.flat());
+                heatmap.appendChild(cell);
+            }
+        }
     </script>
 </body>
 </html>
