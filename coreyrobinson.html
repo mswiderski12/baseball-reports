@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Baseball Heat Map</title>
+    <title>Baseball Strike Zone Heat Map</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
-    <h1>Baseball Heat Map</h1>
+    <h1>Baseball Strike Zone Heat Map</h1>
     
     <input type="file" id="csvFileInput">
-    <button onclick="generateHeatMap()">Generate Heat Map</button>
+    <button onclick="generateHeatMap()">Generate Strike Zone Heat Map</button>
     
     <div id="heatmap"></div>
     
@@ -32,15 +32,18 @@
                 data.push({ x, y });
             }
             
+            // Filter data to display within strike zone (modify as needed)
+            const strikeZoneData = data.filter(point => point.x >= -1 && point.x <= 1 && point.y >= 1 && point.y <= 4);
+            
             const trace = {
-                x: data.map(point => point.x),
-                y: data.map(point => point.y),
+                x: strikeZoneData.map(point => point.x),
+                y: strikeZoneData.map(point => point.y),
                 type: "heatmap",
                 colorscale: "Viridis"
             };
             
             const layout = {
-                title: "Baseball Heat Map"
+                title: "Baseball Strike Zone Heat Map"
             };
             
             Plotly.newPlot("heatmap", [trace], layout);
