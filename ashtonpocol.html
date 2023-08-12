@@ -1,85 +1,59 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Baseball Strike Zone Heat Map</title>
+    <title>Fillable Baseball Spray Chart</title>
     <style>
         body {
             font-family: Arial, sans-serif;
         }
 
-        .strike-zone {
-            width: 300px;
-            height: 450px;
-            border: 2px solid #333;
+        .field {
+            width: 500px;
+            height: 500px;
+            background-color: #f0f0f0;
             position: relative;
-            margin: 50px auto;
+            margin: 0 auto;
         }
 
-        .heatmap {
-            width: 100%;
-            height: 100%;
+        .hit {
+            width: 10px;
+            height: 10px;
+            background-color: blue;
+            border-radius: 50%;
             position: absolute;
-            top: 0;
-            left: 0;
-            background-color: rgba(0, 0, 255, 0.2);
-        }
-
-        .heatmap-cell {
-            position: absolute;
-            width: 10%;
-            height: 10%;
-            opacity: 0.5;
         }
     </style>
 </head>
 <body>
-    <h1>Baseball Strike Zone Heat Map</h1>
-
-    <div class="strike-zone">
-        <div class="heatmap" id="heatmap"></div>
+    <h1>Fillable Baseball Spray Chart</h1>
+    
+    <div>
+        <label for="xCoord">X Coordinate:</label>
+        <input type="number" id="xCoord" min="-250" max="250" step="1">
+        
+        <label for="yCoord">Y Coordinate:</label>
+        <input type="number" id="yCoord" min="0" max="500" step="1">
+        
+        <button onclick="addHit()">Add Hit</button>
     </div>
 
+    <div class="field" id="field"></div>
+
     <script>
-        // Load pitch data from CSV file
-        async function loadPitchData() {
-            const response = await fetch('Untitled spreadsheet.xlsx - Sheet1 (1).csv');
-            const text = await response.text();
-            const rows = text.trim().split('\n');
-            const pitchData = rows.slice(1).map(row => {
-                const [x, y] = row.split(',');
-                return { x: parseFloat(x), y: parseFloat(y) };
-            });
-            return pitchData;
-        }
+        function addHit() {
+            const xCoord = parseFloat(document.getElementById("xCoord").value);
+            const yCoord = parseFloat(document.getElementById("yCoord").value);
 
-        // Calculate heatmap density
-        async function createHeatmap() {
-            const pitchData = await loadPitchData();
-            const heatmapDensity = Array.from({ length: 10 }, () => Array.from({ length: 10 }, () => 0));
-            pitchData.forEach(pitch => {
-                const xIndex = Math.floor((pitch.x + 1) * 5);
-                const yIndex = Math.floor((pitch.y + 2) * 5);
-                heatmapDensity[yIndex][xIndex]++;
-            });
+            if (!isNaN(xCoord) && !isNaN(yCoord)) {
+                const field = document.getElementById("field");
 
-            // Create heatmap cells
-            const heatmap = document.getElementById("heatmap");
-            for (let y = 0; y < 10; y++) {
-                for (let x = 0; x < 10; x++) {
-                    const cell = document.createElement("div");
-                    cell.className = "heatmap-cell";
-                    cell.style.width = "10%";
-                    cell.style.height = "10%";
-                    cell.style.left = (x * 10) + "%";
-                    cell.style.top = (y * 10) + "%";
-                    cell.style.opacity = heatmapDensity[y][x] / Math.max(...heatmapDensity.flat());
-                    heatmap.appendChild(cell);
-                }
+                const hitElement = document.createElement("div");
+                hitElement.className = "hit";
+                hitElement.style.left = (xCoord + 250) + "px";
+                hitElement.style.top = (500 - yCoord) + "px";
+                field.appendChild(hitElement);
             }
         }
-
-        // Call the function to create the heatmap
-        createHeatmap();
     </script>
 </body>
 </html>
