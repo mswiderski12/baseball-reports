@@ -1,15 +1,50 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <title>Corey Robinson</title>
-  </head>
-  <center>
-    <h1>Corey Robinson Hitting Reports</h1>
-  <body>
-    <div class="container">
-    <div class="container">
-      <div class="image"> <img src="" alt=</div> 
-      <div class="image"> <img src=""</div>
-    </div>
-        </center>
-  </body
+<head>
+    <title>Baseball Heat Map</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <h1>Baseball Heat Map</h1>
+    
+    <input type="file" id="csvFileInput">
+    <button onclick="generateHeatMap()">Generate Heat Map</button>
+    
+    <div id="heatmap"></div>
+    
+    <script>
+        async function generateHeatMap() {
+            const csvFileInput = document.getElementById("csvFileInput");
+            const file = csvFileInput.files[0];
+            
+            if (!file) {
+                alert("Please select a CSV file.");
+                return;
+            }
+            
+            const text = await file.text();
+            const rows = text.trim().split('\n');
+            
+            const data = [];
+            
+            for (let i = 1; i < rows.length; i++) {
+                const [x, y] = rows[i].split(',').map(parseFloat);
+                data.push({ x, y });
+            }
+            
+            const trace = {
+                x: data.map(point => point.x),
+                y: data.map(point => point.y),
+                type: "heatmap",
+                colorscale: "Viridis"
+            };
+            
+            const layout = {
+                title: "Baseball Heat Map"
+            };
+            
+            Plotly.newPlot("heatmap", [trace], layout);
+        }
+    </script>
+</body>
 </html>
