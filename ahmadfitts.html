@@ -1,14 +1,48 @@
-<html>
-  <head>
-    <title>Ahmad Fitts</title>
-  </head>
-  <body>
-    <center>
-      <h1>Ahmad Fitts Hitting Report</h1>
-    <div class="container">
-      <div class="image"> <img src="Fitts 6.4.png" style="width:1000px;height:300px;"</div>
-       <div class="image"> <img src="Fitts 6.2.png" style="width:1000px;height:300px;"</div> 
-    </div>
-        </center>
-  </body
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Baseball Data Visualization</title>
+    <!-- Include D3.js library -->
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</head>
+<body>
+    <h1>Baseball Data Visualization</h1>
+
+    <!-- Create a container for the chart -->
+    <div id="chart-container"></div>
+
+    <script>
+        // Load the CSV data
+        d3.csv("baseball_data.csv").then(function(data) {
+            // Parse data if needed (convert strings to numbers, dates, etc.)
+
+            // Define your chart dimensions
+            const width = 800;
+            const height = 400;
+
+            // Create an SVG element within the chart container
+            const svg = d3.select("#chart-container")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            // Define scales for your data (x and y scales)
+
+            // Create circles or other visual elements based on the data
+            svg.selectAll("circle")
+                .data(data)
+                .enter()
+                .append("circle")
+                .attr("cx", function(d) { return xScale(d.xValue); }) // Adjust to your data
+                .attr("cy", function(d) { return yScale(d.yValue); }) // Adjust to your data
+                .attr("r", 5); // Adjust the circle radius
+
+            // Add axes and labels if needed
+
+        }).catch(function(error) {
+            console.log("Error loading data:", error);
+        });
+    </script>
+</body>
 </html>
