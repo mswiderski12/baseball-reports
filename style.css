@@ -46,7 +46,7 @@ h2 {
     margin-top: 0;
 }
 
-.button {
+<button> {
   background-color: #4CAF50; /* Green */
   border: none;
   color: white;
