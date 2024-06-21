@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reds Scouting Report</title>
+    <style>
+    
+    h1 {
+  text-align: center;
+  
+   h2 {
+  text-align: center;
+  
+        .big-box {
+            width: 100%;
+            height: 200px;
+        }
+        .dropdown {
+            width: 100px;
+            height: 30px;
+        }
+    </style>
+</head>
+<body>
+  <h1>Reds Scouting Reports</h1>
+  <form>
+  <h2>
+    
+    <label for="Name">Player Name:</label>
+<input type="text" id="Name" name="Name" placeholder="Player Name">
+
+   <label for="Name">Scout:</label>
+<input type="text" id="Name" name="Name" placeholder="Matt Swiderski">
+
+   <label for="Name">Last Seen:</label>
+<input type="text" id="Name" name="Name" placeholder="Date">
+
+   <label for="Name">High School:</label>
+<input type="text" id="Name" name="Name" placeholder="High School">
+
+   <label for="Name">Scholarship:</label>
+<input type="text" id="Name" name="Name" placeholder="University/College">
+
+</h2>
+
+<p> <center>
+  
+          <label for="textInput2">Impact Statement:</label><br>
+    <textarea id="textInput2" class="big-box"></textarea><br><br>
+    
+    </center>
+    
+    </p>
+    
+    <p>
+
+
+    <label for="dropdown1">Fastball Velocity:</label><br>
+    <select id="dropdown1" class="dropdown">
+        <option value="">Select a number</option>
+    </select><br><br>
+
+    <label for="dropdown2">Fastball Life:</label><br>
+    <select id="dropdown2" class="dropdown">
+        <option value="">Select a number</option>
+    </select><br><br>
+
+    <label for="dropdown3">Curveball Grade:</label><br>
+    <select id="dropdown3" class="dropdown">
+        <option value="">Select a number</option>
+    </select><br><br>
+    
+    <label for="dropdown3">Slider Grade:</label><br>
+    <select id="dropdown3" class="dropdown">
+        <option value="">Select a number</option>
+    </select><br><br>
+    
+    <label for="dropdown3">Change Grade:</label><br>
+    <select id="dropdown3" class="dropdown">
+        <option value="">Select a number</option>
+    </select><br><br>
+    
+    <label for="dropdown3">Other Grade:</label><br>
+    <select id="dropdown3" class="dropdown">
+        <option value="">Select a number</option>
+    </select><br><br>
+    
+    
+        <label for="textInput1">On-Field Makup:</label><br>
+    <textarea id="textInput1" class="big-box"></textarea><br><br>
+
+    <label for="textInput2">Delivery/Arm Action:</label><br>
+    <textarea id="textInput2" class="big-box"></textarea><br><br>
+    
+        <label for="textInput2">Physical Description:</label><br>
+    <textarea id="textInput2" class="big-box"></textarea><br><br>
+    
+          <label for="textInput2">Summation:</label><br>
+    <textarea id="textInput2" class="big-box"></textarea><br><br>
+    
+    </p>
+	</form>
+    
+    
+    
+    <script>
+        // Function to populate dropdowns with numbers from 20 to 80
+        function populateDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            for (let i = 20; i <= 80; i++) {
+                let option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                dropdown.appendChild(option);
+            }
+        }
+
+        // Populate all dropdowns
+        populateDropdown('dropdown1');
+        populateDropdown('dropdown2');
+        populateDropdown('dropdown3');
+    </script>
+</body>
+</html>
