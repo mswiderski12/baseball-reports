@@ -1,63 +1,41 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ubc pg</title>
-    <link rel="stylesheet" type="text/css" href="style.css"
+    <title>Email Form</title>
 </head>
 <body>
-    
-    <header>
-        <h1>Reds Scouting Reports</h1>
-    </header>
-
-    <div class="wrapper">
-
- 
-             <div class="content">
-       <center><h1>Perfect Game UBC June 17/18</h1></center>
-
-        <center><img src="reds-throwback" alt="Dsc" class="center"></center>
-
-             <a href="elantigua.html">
-            <button>Emmanuel Lantigua</button>
-
-            <a href="ledwards.html">
-            <button>Lamar Edwards</button>
-
-          <a href="mmagana.html">
-            <button>Mario Magana</button>
-
-            <a href="msay.html">
-            <button>Michael Say</button>
-
-             <a href="aelissalt.html">
-            <button>Aaron Ellisalt</button>
-
-                 
-                          </div>
+    <form action="send_email.php" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
         
-        <nav class="side-panel">
-            <ul>
-
-                      <a href="index.html">
-            <button>Homepage</button>
-                
-        <a href="ubc-pc.html">
-            <button>UBC Perfect Game</button>
-
-              <a href="">
-            <button>Tournament 2</button>
-
-                   <a href="">
-            <button>Tournament 3</button>
-
-                           <a href="">
-            <button>Search By Player</button>
-
-            </ul>
-        </nav>
-        </div>
-    </div>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        
+        <label for="message">Message:</label>
+        <textarea id="message" name="message" required></textarea>
+        
+        <button type="submit">Send Email</button>
+    </form>
 </body>
 </html>
+
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = htmlspecialchars($_POST['name']);
+    $email = htmlspecialchars($_POST['email']);
+    $message = htmlspecialchars($_POST['message']);
+    
+    $to = "mswid05@gmail.com"; // Replace with your email address
+    $subject = "New message from contact form";
+    $body = "Name: $name\nEmail: $email\nMessage:\n$message";
+    $headers = "From: $email";
+
+    if (mail($to, $subject, $body, $headers)) {
+        echo "Email sent successfully!";
+    } else {
+        echo "Failed to send email.";
+    }
+}
+?>
